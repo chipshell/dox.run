@@ -10,6 +10,7 @@ __puton__ () {
     help__
     exit
   fi
+  __appdir=$(realpath $__appdir)
   project=$(basename $__appdir)
   image=$project-image
 }
