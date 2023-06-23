@@ -1,0 +1,44 @@
+#! /usr/bin/env bash
+
+: "${__appdir:=.}"
+: "${__datadir:=./data}"
+
+
+__puton__ () {
+  if [ ! -e $__appdir/Dockerfile ]; then
+    echo ERROR: no Dockerfile found under $__appdir
+    help__
+    exit
+  fi
+  project=$(basename $__appdir)
+  image=$project-image
+}
+
+info__ () {
+  echo Project: $project
+  echo appdir: $__appdir
+  echo datadir: $__datadir
+}
+
+build__ () {
+  docker build -t $image $__appdir
+}
+
+bash__ () {
+  docker exec -it $image bash
+}
+
+run__ () {
+  docker run -it --rm \
+    -v $__appdir:/app \
+    -v $__datadir:/data \
+    $image $@
+}
+
+kill__help='@arg docker name @does kill all instances of a name'
+kill__ () {
+  docker rm -f $(docker ps -a -q --filter ancestor=$image) || echo 'nothing left to kill.' && return 0
+}
+
+. undies
+
