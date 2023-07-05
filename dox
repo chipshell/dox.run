@@ -6,9 +6,8 @@
 
 __puton__ () {
   if [ ! -e $__appdir/Dockerfile ]; then
-    echo ERROR: no Dockerfile found under $__appdir
-    help__
-    exit
+    echo [ERROR]: no Dockerfile found under $__appdir
+    return 1
   fi
   __appdir=$(realpath $__appdir)
   project=$(basename $__appdir)
