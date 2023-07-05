@@ -10,33 +10,40 @@ __puton__ () {
     return 1
   fi
   __appdir=$(realpath $__appdir)
-  project=$(basename $__appdir)
-  image=$project-image
+}
+
+name__ () {
+  basename $__appdir
+}
+
+image__ () {
+  echo $(name__)'-image'
 }
 
 info__ () {
-  echo Project: $project
+  echo Project: $(name__)
   echo appdir: $__appdir
   echo datadir: $__datadir
 }
 
 build__ () {
-  docker build -t $image $__appdir
+  docker build -t $(image__) $__appdir
 }
 
 bash__ () {
-  docker exec -it $image bash
+  docker exec -it $(image__) bash
 }
 
 run__ () {
   docker run -it --rm \
     -v $__appdir:/app \
     -v $__datadir:/data \
-    $image $@
+    $(image__) $@
 }
 
 kill__help='@arg docker name @does kill all instances of a name'
 kill__ () {
+  local image=$(image__)
   docker rm -f $(docker ps -a -q --filter ancestor=$image) || echo 'nothing left to kill.' && return 0
 }
 
