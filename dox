@@ -24,6 +24,34 @@ info__ () {
   echo Project: $(name__)
   echo appdir: $__appdir
   echo datadir: $__datadir
+  echo '@see status command'
+}
+
+status__ () {
+  # Store the image name in a variable
+  image_name=$(image__)
+
+  # Print image details
+  echo "Image Details:"
+  docker image inspect $image_name
+
+  # Find containers that are using the image
+  echo "Containers using the image:"
+  docker container ls --all --filter ancestor=$image_name
+
+  # Check if the image exists in the local Docker image repository
+  if docker image inspect $image_name > /dev/null 2>&1; then
+      echo "The image exists in the local Docker image repository."
+  else
+      echo "The image does not exist in the local Docker image repository."
+  fi
+
+  # Check if the image is being used by any running containers
+  if [ $(docker ps -a -q --no-trunc --filter ancestor=$image_name | wc -l) -gt 0 ]; then
+      echo "The image is being used by running containers."
+  else
+      echo "The image is not being used by any running containers."
+  fi
 }
 
 build__ () {
