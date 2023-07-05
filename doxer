@@ -1,0 +1,19 @@
+#! /usr/bin/env bash
+
+__doxdir=$HOME/doxes
+
+path__ () {
+  echo $__doxdir/$1
+}
+
+for__ () {
+  local dox=$1
+  shift
+  __appdir=$(path__ $dox) dox $@
+}
+
+list__ () {
+  ls $__doxdir
+}
+
+. undies
