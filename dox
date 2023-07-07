@@ -4,23 +4,44 @@
 : "${__datadir:=.}"
 
 
+declare -A dox_volumes
+
 __puton__ () {
-  if [ ! -e $__appdir/Dockerfile ]; then
-    echo [ERROR]: no Dockerfile found under $__appdir
+  __appdir=$(realpath $__appdir)
+  __datadir=$(realpath $__datadir)
+  if [ -f $__appdir/Doxfile ]; then
+    source $__appdir/Doxfile
+  fi
+}
+
+__valid () {
+  local appdir=${1:-$__appdir}
+  if [ ! -e $appdir/Dockerfile ]; then
+    echo [ERROR]: no Dockerfile found under $appdir
     return 1
   fi
-  __appdir=$(realpath $__appdir)
+}
+
+for__ () {
+  local appdir=$1
+  shift
+  __valid $appdir || return
+  __appdir=$(realpath $appdir)
+  __run $@
 }
 
 name__ () {
+  __valid || return
   basename $__appdir
 }
 
 image__ () {
+  __valid || return
   echo $(name__)'-image'
 }
 
 info__ () {
+  __valid || return
   echo Project: $(name__)
   echo appdir: $__appdir
   echo datadir: $__datadir
@@ -28,6 +49,7 @@ info__ () {
 }
 
 status__ () {
+  __valid || return
   # Store the image name in a variable
   image_name=$(image__)
 
@@ -55,22 +77,35 @@ status__ () {
 }
 
 build__ () {
+  __valid || return
   docker build -t $(image__) $__appdir
 }
 
 bash__ () {
+  __valid || return
   docker exec -it $(image__) bash
 }
 
 run__ () {
+  __valid || return
+
+  dox_volumes[$__appdir]='/app'
+  dox_volumes[$__datadir]='/data'
+
+  volume_options=()
+  for source in "${!dox_volumes[@]}"; do
+    destination=${dox_volumes[$source]}
+    volume_options+=("-v" "$source:$destination")
+  done
+
   docker run -it --rm \
-    -v $__appdir:/app \
-    -v $__datadir:/data \
+    "${volume_options[@]}" \
     $(image__) $@
 }
 
 kill__help='@arg docker name @does kill all instances of a name'
 kill__ () {
+  __valid || return
   local image=$(image__)
   docker rm -f $(docker ps -a -q --filter ancestor=$image) || echo 'nothing left to kill.' && return 0
 }
