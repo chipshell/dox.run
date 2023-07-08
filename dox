@@ -5,6 +5,7 @@
 
 
 declare -A dox_volumes
+declare -A dox_ports
 
 __puton__ () {
   __appdir=$(realpath $__appdir)
@@ -98,8 +99,15 @@ run__ () {
     volume_options+=("-v" "$source:$destination")
   done
 
+  port_options=()
+  for source in "${!dox_ports[@]}"; do
+    destination=${dox_ports[$source]}
+    port_options+=("-p" "$source:$destination")
+  done
+
   docker run -it --rm \
     "${volume_options[@]}" \
+    "${port_options[@]}" \
     $(image__) $@
 }
 
