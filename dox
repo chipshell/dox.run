@@ -90,6 +90,16 @@ bash__ () {
 run__ () {
   __valid || return
 
+  local run_args=$@
+
+  # if --dox is present, reset all args prior
+  while [ ${@:(( i )):1} ]; do
+    if [ ${@:(( i++ )):1} = '--dox' ]; then
+      run_args=${@:$i}
+      break
+    fi
+  done
+
   dox_volumes[$__appdir]='/app'
   dox_volumes[$__datadir]='/data'
 
@@ -108,7 +118,7 @@ run__ () {
   docker run -it --rm \
     "${volume_options[@]}" \
     "${port_options[@]}" \
-    $(image__) $@
+    $(image__) $run_args
 }
 
 kill__help='@arg docker name @does kill all instances of a name'
