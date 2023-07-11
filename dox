@@ -125,7 +125,7 @@ run__ () {
   docker run -it --rm \
     "${volume_options[@]}" \
     "${port_options[@]}" \
-    $(image__) $@
+    $(image__) "sh -c '$@'"
 }
 
 kill__help='@arg docker name @does kill all instances of a name'
