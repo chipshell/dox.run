@@ -41,6 +41,44 @@ image__ () {
   echo $(name__)'-image'
 }
 
+ps__help='@arg docker ps args @does run docker ps for the containers of this image'
+ps__ () {
+  docker ps --filter ancestor=$(image__) $@
+}
+
+ids__help='@does print the list of container IDs'
+ids__ () {
+  ps__ --format {{.ID}}
+}
+
+id__ () {
+  ids__ | tail -n1
+}
+
+ips__help='@does print the list of IPs for the running containers'
+ips__ () {
+  ids__ | grep -v '^$' | xargs -r -n 1 docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'
+}
+
+ip__ () {
+  ips__ | tail -n1
+}
+
+containers__help='@does print a list of containers in table format'
+containers__ () {
+  ps__ --format \'table {{.ID}} {{.CreatedAt}}\' $@
+}
+
+oldest__help='@does give the ID for the oldest running container.'
+oldest__ () {
+ containers__ | sort | head -n1
+}
+
+latest__help='@does give the ID for the latest running container.'
+latest__ () {
+ containers__ | sed -n '2p' | sort | tail -n1
+}
+
 info__ () {
   __valid || return
   echo Project: $(name__)
