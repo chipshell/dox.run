@@ -6,6 +6,7 @@
 
 declare -A dox_volumes
 declare -A dox_ports
+declare -A dox_scripts
 
 __puton__ () {
   __appdir=$(realpath $__appdir)
@@ -125,7 +126,7 @@ build__ () {
 
 bash__ () {
   __valid || return
-  docker exec -it $(image__) bash
+  docker run --rm -it $(image__) sh -c "'$@'"
 }
 
 __trigger_on_reset_arg () {
@@ -166,14 +167,42 @@ run__ () {
   docker run -it --rm \
     "${volume_options[@]}" \
     "${port_options[@]}" \
-    $(image__) "sh -c '$@'"
+    $(image__) $@
+}
+
+scripts__ () {
+  printf 'Available tasks (%d):\n' ${#dox_scripts[@]}
+  for key in ${!dox_scripts[@]}; do
+    printf ' - %s: %s\n' $key "${dox_scripts[$key]}"
+  done
+  echo
+  echo 'Run using `dox exec [script_name]`'
+}
+
+exec__ () {
+  __valid || return
+  __trigger_on_reset_arg '--dox' '__run' $@ && return
+  local script=$1
+  local command=${dox_scripts[$script]}
+  if [ -z "$command" ]; then
+    echo '[ERROR] Script not found:' $script
+    echo
+    echo '@see `dox scripts` to get a list of scripts'
+    return
+  fi
+  run__ "$command"
 }
 
 kill__help='@arg docker name @does kill all instances of a name'
 kill__ () {
   __valid || return
   local image=$(image__)
-  docker rm -f $(docker ps -a -q --filter ancestor=$image) || echo 'nothing left to kill.' && return 0
+  local list=$(docker ps -a -q --filter ancestor=$image)
+  if [ -z "$list" ]; then
+    echo 'nothing left to kill.'
+    return
+  fi
+  docker rm -f $list
 }
 
 . undies
