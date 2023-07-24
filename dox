@@ -13,6 +13,9 @@ __puton__ () {
   if [ -f $__appdir/Doxfile ]; then
     source $__appdir/Doxfile
   fi
+  if [ -f $__datadir/Doxfile ]; then
+    source $__datadir/Doxfile
+  fi
 }
 
 __valid () {
