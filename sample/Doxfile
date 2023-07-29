@@ -1,4 +1,4 @@
 dox_volumes[$HOME]=/root
 
-dox_ports[9080]=8080
+dox_ports[9090]=8080
 
