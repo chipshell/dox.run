@@ -7,6 +7,7 @@
 declare -A dox_volumes
 declare -A dox_ports
 declare -A dox_scripts
+declare -A dox_variables
 
 __puton__ () {
   __appdir=$(realpath $__appdir)
@@ -164,9 +165,16 @@ run__ () {
     port_options+=("-p" "$source:$destination")
   done
 
+  variable_options=()
+  for key in "${!dox_variables[@]}"; do
+    value=${dox_variables[$key]}
+    variable_options+=("-e" "$key=$value")
+  done
+
   docker run -it --rm \
     "${volume_options[@]}" \
     "${port_options[@]}" \
+    "${variable_options[@]}" \
     $(image__) $@
 }
 
