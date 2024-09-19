@@ -131,7 +131,7 @@ build__ () {
 
 bash__ () {
   __valid || return
-  docker run --rm -it $(image__) sh -c "'$@'"
+  docker run --rm -it $(image__) "bash"
 }
 
 __trigger_on_reset_arg () {
