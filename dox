@@ -38,6 +38,10 @@ for__ () {
 
 name__ () {
   __valid || return
+  if [ -e $__appdir/DOX_NAME ]; then
+    cat $__appdir/DOX_NAME
+    return
+  fi
   basename $__appdir
 }
 
